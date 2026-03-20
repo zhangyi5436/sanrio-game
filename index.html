@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>三丽鸥益智贪吃蛇</title>
     <style>
         * {
@@ -19,17 +19,19 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 10px;
+            padding: 5px;
             overflow: hidden;
+            margin: 0;
         }
 
         #game-container {
             width: 100%;
-            height: 98vh;
+            height: 100vh;
+            height: 100dvh;
             max-width: 900px;
-            max-height: 700px;
+            max-height: 720px;
             background: #fff9fb;
-            border-radius: 20px;
+            border-radius: 15px;
             box-shadow: 0 8px 30px rgba(255, 182, 193, 0.3);
             display: flex;
             flex-direction: column;
@@ -78,17 +80,20 @@
         /* 中部游戏区域 */
         #game-area {
             flex: 1;
-            display: flex;
+            display: 1 1 auto;
+            display: 1;
             justify-content: center;
             align-items: center;
-            padding: 15px;
+            padding: 10px;
             background: #fefbff;
             position: relative;
+            min-height: 0;
         }
 
         #canvas-container {
             width: 100%;
             height: 100%;
+            display: 1 1 auto;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -315,44 +320,55 @@
 
         /* 响应式适配 */
         @media (max-width: 600px) {
+            body {
+                padding: 0;
+            }
+
             #game-container {
-                height: 96vh;
+                height: 100vh;
+                height: 100dvh;
                 max-height: none;
+                border-radius: 0;
             }
 
             #top-bar {
-                height: 60px;
-                padding: 0 10px;
+                height: 70px;
+                padding: 0 15px;
             }
 
             #question {
-                font-size: 32px;
+                font-size: 36px;
             }
 
             #timer {
-                font-size: 22px;
+                font-size: 24px;
             }
 
             #bottom-bar {
-                height: 50px;
+                height: 60px;
             }
 
             .status-value {
-                font-size: 20px;
+                font-size: 22px;
             }
 
             .title {
                 font-size: 32px;
+                margin-bottom: 15px;
             }
 
             .characters-grid {
                 grid-template-columns: repeat(3, 1fr);
-                gap: 10px;
+                gap: 15px;
+            }
+
+            .character-card {
+                padding: 10px;
             }
 
             .character-img {
-                width: 60px;
-                height: 60px;
+                width: 70px;
+                height: 70px;
             }
 
             .mode-select {
@@ -361,8 +377,13 @@
             }
 
             .mode-card {
-                width: 220px;
-                padding: 20px;
+                width: 240px;
+                padding: 25px;
+            }
+
+            .btn {
+                padding: 12px 40px;
+                font-size: 20px;
             }
         }
 
@@ -470,13 +491,13 @@
     <script>
         // ==================== 游戏配置 ====================
         const GAME_CONFIG = {
-            canvasWidth: 800,
+            canvasWidth: 720,
             canvasHeight: 480,
-            gridSize: 20,
+            gridSize: 30,
             initialLength: 3,
             numEggs: 5,
             gameTime: 300, // 5分钟
-            tileCornerRadius: 8
+            tileCornerRadius: 10
         };
 
         const CHARACTERS = [
@@ -522,12 +543,12 @@
             // 生成角色选择
             renderCharacterSelection();
             
-            // 触摸事件监听（手机端）
-            canvas.addEventListener('touchstart', handleTouchStart, false);
-            canvas.addEventListener('touchmove', handleTouchMove, false);
+            // 触摸事件监听（手机端） - 绑定到document确保能触发
+            document.addEventListener('touchstart', handleTouchStart, {passive: false});
+            document.addEventListener('touchmove', handleTouchMove, {passive: false});
             
-            // 键盘事件监听
-            window.addEventListener('keydown', handleKeyDown);
+            // 键盘事件监听 - 绑定到document
+            document.addEventListener('keydown', handleKeyDown);
         };
 
         function resizeCanvas() {
@@ -955,7 +976,7 @@
                 
                 // 数字
                 ctx.fillStyle = '#8b4513';
-                ctx.font = `bold ${gs/2}px Comic Sans MS`;
+                ctx.font = `bold ${Math.floor(gs * 0.6)}px Comic Sans MS`;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(egg.value.toString(), x + gs/2, y + gs/2);
@@ -1114,19 +1135,19 @@
             const diffX = touchEndX - touchStartX;
             const diffY = touchEndY - touchStartY;
 
-            // 判断滑动方向
+            // 判断滑动方向 - 降低阈值，提升灵敏度
             if (Math.abs(diffX) > Math.abs(diffY)) {
                 // 水平滑动
-                if (diffX > 50 && direction1.x !== -1) {
+                if (diffX > 30 && direction1.x !== -1) {
                     nextDirection1 = { x: 1, y: 0 };
-                } else if (diffX < -50 && direction1.x !== 1) {
+                } else if (diffX < -30 && direction1.x !== 1) {
                     nextDirection1 = { x: -1, y: 0 };
                 }
             } else {
                 // 垂直滑动
-                if (diffY > 50 && direction1.y !== -1) {
+                if (diffY > 30 && direction1.y !== -1) {
                     nextDirection1 = { x: 0, y: 1 };
-                } else if (diffY < -50 && direction1.y !== 1) {
+                } else if (diffY < -30 && direction1.y !== 1) {
                     nextDirection1 = { x: 0, y: -1 };
                 }
             }
