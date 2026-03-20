@@ -586,6 +586,8 @@
         function startGame() {
             // 判断是否手机端，默认单人
             const isMobile = window.innerWidth < 600;
+            // 重新渲染角色选择
+            renderCharacterSelection();
             if (isMobile) {
                 gameMode = 'single';
                 showScreen('characterScreen');
@@ -607,6 +609,7 @@
                 document.querySelector('.title').textContent = '选择两个角色';
                 document.getElementById('lengthBox2').classList.remove('hidden');
             }
+            renderCharacterSelection();
             showScreen('characterScreen');
         }
 
