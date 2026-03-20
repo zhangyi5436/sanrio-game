@@ -532,7 +532,7 @@
         let touchStartY = 0;
 
         // ==================== 初始化 ====================
-        window.onload = function() {
+        function initGame() {
             canvas = document.getElementById('gameCanvas');
             ctx = canvas.getContext('2d');
             
@@ -549,6 +549,17 @@
             
             // 键盘事件监听 - 绑定到document
             document.addEventListener('keydown', handleKeyDown);
+        }
+
+        // DOM 加载完成后初始化
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initGame);
+        } else {
+            initGame();
+        }
+
+        window.onload = function() {
+            resizeCanvas();
         };
 
         function resizeCanvas() {
@@ -1056,29 +1067,42 @@
         // ==================== 键盘控制 ====================
         function handleKeyDown(e) {
             if (gameState !== 'playing') return;
+            console.log('Key pressed:', e.key, 'gameMode:', gameMode);
 
-            // 蛇1（双人模式：WSAD，单人模式：方向键）
             if (gameMode === 'single') {
+                // 单人模式：方向键控制蛇1
                 switch(e.key) {
                     case 'ArrowUp':
-                        if (direction1.y !== 1) nextDirection1 = { x: 0, y: -1 };
+                        if (direction1.y !== 1) {
+                            nextDirection1 = { x: 0, y: -1 };
+                            console.log('Change direction to UP');
+                        }
                         e.preventDefault();
                         break;
                     case 'ArrowDown':
-                        if (direction1.y !== -1) nextDirection1 = { x: 0, y: 1 };
+                        if (direction1.y !== -1) {
+                            nextDirection1 = { x: 0, y: 1 };
+                            console.log('Change direction to DOWN');
+                        }
                         e.preventDefault();
                         break;
                     case 'ArrowLeft':
-                        if (direction1.x !== 1) nextDirection1 = { x: -1, y: 0 };
+                        if (direction1.x !== 1) {
+                            nextDirection1 = { x: -1, y: 0 };
+                            console.log('Change direction to LEFT');
+                        }
                         e.preventDefault();
                         break;
                     case 'ArrowRight':
-                        if (direction1.x !== -1) nextDirection1 = { x: 1, y: 0 };
+                        if (direction1.x !== -1) {
+                            nextDirection1 = { x: 1, y: 0 };
+                            console.log('Change direction to RIGHT');
+                        }
                         e.preventDefault();
                         break;
                 }
             } else {
-                // 双人模式，玩家1：WSAD
+                // 双人模式：玩家1 WSAD，玩家2 方向键
                 switch(e.key.toLowerCase()) {
                     case 'w':
                         if (direction1.y !== 1) nextDirection1 = { x: 0, y: -1 };
@@ -1096,7 +1120,8 @@
                         if (direction1.x !== -1) nextDirection1 = { x: 1, y: 0 };
                         e.preventDefault();
                         break;
-                    // 玩家2：方向键
+                }
+                switch(e.key) {
                     case 'ArrowUp':
                         if (direction2.y !== 1) nextDirection2 = { x: 0, y: -1 };
                         e.preventDefault();
