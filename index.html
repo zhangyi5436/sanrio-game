@@ -498,7 +498,7 @@
             numEggs: 5,
             gameTime: 300, // 5分钟
             tileCornerRadius: 10,
-            moveInterval: 250 // 移动间隔毫秒，越大越慢
+            moveInterval: 300 // 移动间隔毫秒，越大越慢
         };
 
         const CHARACTERS = [
@@ -578,8 +578,8 @@
                 canvasHeight = 480;
             } else {
                 // 竖屏（手机）→ 增高画布，竖向格子更多，体验更好
-                canvasWidth = 540;
-                canvasHeight = 660;
+                canvasWidth = 480;
+                canvasHeight = 720;
             }
             
             GAME_CONFIG.canvasWidth = canvasWidth;
