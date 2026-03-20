@@ -708,12 +708,12 @@
             eggs = [];
             const answer = currentQuestion.answer;
             
-            // 生成正确答案
+            // 生成正确答案 → 1个
             eggs.push({ value: answer, x: -1, y: -1, correct: true });
             
-            // 生成4个错误答案，贴近正确值
+            // 生成3个错误答案，贴近正确值
             const wrongAnswers = new Set();
-            while (wrongAnswers.size < 4) {
+            while (wrongAnswers.size < 3) {
                 let offset = Math.floor(Math.random() * 5) + 1;
                 if (Math.random() > 0.5) offset = -offset;
                 let wrongVal = answer + offset;
@@ -726,7 +726,7 @@
                 eggs.push({ value: val, x: -1, y: -1, correct: false });
             });
 
-            // 随机位置，避开蛇身
+            // 随机位置，避开蛇身和当前蛇所在行列
             placeEggsRandomly();
         }
 
@@ -734,24 +734,84 @@
             const cols = Math.floor(GAME_CONFIG.canvasWidth / GAME_CONFIG.gridSize);
             const rows = Math.floor(GAME_CONFIG.canvasHeight / GAME_CONFIG.gridSize);
             
+            // 记录已占据的位置
             const occupied = new Set();
-            snake1.forEach(seg => occupied.add(`${seg.x},${seg.y}`));
+            // 记录蛇占据的行列，新蛋不能出现在这些行列
+            const forbiddenRows = new Set();
+            const forbiddenCols = new Set();
+            
+            // 收集蛇所有的行列
+            snake1.forEach(seg => {
+                occupied.add(`${seg.x},${seg.y}`);
+                forbiddenRows.add(seg.y);
+                forbiddenCols.add(seg.x);
+            });
             if (gameMode === 'double') {
-                snake2.forEach(seg => occupied.add(`${seg.x},${seg.y}`));
+                snake2.forEach(seg => {
+                    occupied.add(`${seg.x},${seg.y}`);
+                    forbiddenRows.add(seg.y);
+                    forbiddenCols.add(seg.x);
+                });
             }
 
-            eggs.forEach(egg => {
+            // 尝试分散放置蛋，每个蛋尽量远离其他蛋
+            eggs.forEach((egg, index) => {
                 let attempts = 0;
-                let x, y;
-                do {
-                    x = Math.floor(Math.random() * cols);
-                    y = Math.floor(Math.random() * rows);
+                let bestX = null;
+                let bestY = null;
+                let bestMinDist = 0;
+
+                // 多次随机找一个分散性最好的位置
+                while (attempts < 50) {
+                    let x = Math.floor(Math.random() * cols);
+                    let y = Math.floor(Math.random() * rows);
+
+                    // 规则1：不能在蛇占据的位置
+                    if (occupied.has(`${x},${y}`)) {
+                        attempts++;
+                        continue;
+                    }
+
+                    // 规则2：不能在蛇所在的任何一行或一列
+                    if (forbiddenRows.has(y) || forbiddenCols.has(x)) {
+                        attempts++;
+                        continue;
+                    }
+
+                    // 计算到已放置蛋的最小距离，越大越分散
+                    let minDist = 9999;
+                    eggs.forEach((otherEgg, otherIndex) => {
+                        if (otherIndex < index && otherEgg.x >= 0) {
+                            const dist = Math.abs(x - otherEgg.x) + Math.abs(y - otherEgg.y);
+                            minDist = Math.min(minDist, dist);
+                        }
+                    });
+
+                    // 记录最好位置（最远最小距离）
+                    if (minDist > bestMinDist) {
+                        bestMinDist = minDist;
+                        bestX = x;
+                        bestY = y;
+                    }
                     attempts++;
-                } while (occupied.has(`${x},${y}`) && attempts < 100);
-                
-                egg.x = x;
-                egg.y = y;
-                occupied.add(`${x},${y}`);
+                }
+
+                // 如果找到位置就用，否则随便找一个
+                if (bestX === null) {
+                    // 如果找不到符合行列规则的，放宽限制
+                    do {
+                        x = Math.floor(Math.random() * cols);
+                        y = Math.floor(Math.random() * rows);
+                        attempts++;
+                    } while (occupied.has(`${x},${y}`) && attempts < 100);
+                    egg.x = x;
+                    egg.y = y;
+                } else {
+                    egg.x = bestX;
+                    egg.y = bestY;
+                }
+
+                occupied.add(`${egg.x},${egg.y}`);
             });
         }
 
