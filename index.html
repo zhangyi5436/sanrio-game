@@ -608,7 +608,12 @@
             if (gameMode === 'double') {
                 document.querySelector('.title').textContent = '选择两个角色';
                 document.getElementById('lengthBox2').classList.remove('hidden');
+            } else {
+                document.querySelector('.title').textContent = '选择你的角色';
+                document.getElementById('lengthBox2').classList.add('hidden');
             }
+            selectedCharacter = null;
+            selectedCharacter2 = null;
             renderCharacterSelection();
             showScreen('characterScreen');
         }
@@ -853,21 +858,24 @@
         function checkEatEgg(snakeNum) {
             const snake = snakeNum === 1 ? snake1 : snake2;
             const head = snake[0];
+            let eatenCorrect = false;
+            let eatenWrong = false;
             
             for (let i = 0; i < eggs.length; i++) {
                 const egg = eggs[i];
                 if (egg.x === head.x && egg.y === head.y) {
                     // 吃到蛋了
                     if (egg.correct) {
-                        // 正确答案，加分，长度+1
+                        // 正确答案，加分，长度+1（尾巴不移出就是变长）
                         score += 10;
                         correctCount++;
-                        // 尾巴不移除 = 变长
+                        eatenCorrect = true;
                         // 生成新题和新蛋
                         generateQuestion();
                         playSound('correct');
                     } else {
                         // 错误答案，长度-1（多移除一个尾巴）
+                        eatenWrong = true;
                         snake.pop();
                         playSound('wrong');
                     }
@@ -875,15 +883,9 @@
                 }
             }
 
-            // 如果没吃到，正常移除尾巴
-            // 这里需要确认：只有吃到正确金蛋的时候才不移除尾巴（长度+1），否则都要移除尾巴保持长度或变短
-            let eatenCorrect = false;
-            for (let egg of eggs) {
-                if (egg.x === head.x && egg.y === head.y && egg.correct) {
-                    eatenCorrect = true;
-                    break;
-                }
-            }
+            // 如果没吃到正确金蛋，移除一次尾巴（正常移动）
+            // 吃到错误已经移除了一次，总共移除两次 → 长度-1
+            // 没吃到，只移除一次 → 长度不变
             if (!eatenCorrect) {
                 snake.pop();
             }
@@ -985,6 +987,18 @@
                 ctx.fill();
             }
 
+            // 预加载所有角色图片
+            if (typeof characterImages === 'undefined') {
+                window.characterImages = {};
+            }
+            if (!window.characterImages[characterId]) {
+                window.characterImages[characterId] = new Image();
+                window.characterImages[characterId].src = `assets/${characterId}.png`;
+                window.characterImages[characterId].onload = function() {
+                    redraw();
+                };
+            }
+
             // 绘制头部（角色图片）
             if (snake.length > 0) {
                 const head = snake[0];
@@ -997,16 +1011,18 @@
                 ctx.arc(x + gs/2, y + gs/2, gs/2 - 1, 0, Math.PI * 2);
                 ctx.fill();
                 
-                // 加载并绘制角色图片
-                const img = new Image();
-                img.src = `assets/${characterId}.png`;
-                img.onload = function() {
-                    redraw();
-                };
-                try {
+                // 绘制角色图片
+                const img = window.characterImages[characterId];
+                if (img.complete) {
                     ctx.drawImage(img, x + 2, y + 2, gs - 4, gs - 4);
-                } catch(e) {
-                    // 图片未加载好，先用圆形代替
+                } else {
+                    // 图片未加载好，显示文字首字
+                    ctx.fillStyle = '#fff';
+                    ctx.font = `bold ${gs/2}px Comic Sans MS`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    const charName = CHARACTERS.find(c => c.id === characterId).name;
+                    ctx.fillText(charName[0], x + gs/2, y + gs/2);
                 }
             }
         }
