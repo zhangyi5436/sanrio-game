@@ -881,6 +881,13 @@
 
             updateStatus();
 
+            // 根据模式显示/隐藏双人状态栏
+            if (gameMode === 'double') {
+                document.getElementById('lengthBox2').classList.remove('hidden');
+            } else {
+                document.getElementById('lengthBox2').classList.add('hidden');
+            }
+
             // 生成第一题
             generateQuestion();
 
