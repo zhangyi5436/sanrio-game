@@ -497,7 +497,8 @@
             initialLength: 3,
             numEggs: 5,
             gameTime: 300, // 5分钟
-            tileCornerRadius: 10
+            tileCornerRadius: 10,
+            moveInterval: 250 // 移动间隔毫秒，越大越慢
         };
 
         const CHARACTERS = [
@@ -568,7 +569,23 @@
             const containerWidth = container.clientWidth;
             const containerHeight = container.clientHeight;
             
-            const ratio = GAME_CONFIG.canvasWidth / GAME_CONFIG.canvasHeight;
+            // 根据容器宽高比自动决定画布方向
+            // 手机竖屏 →  taller canvas，PC横屏 → wider canvas
+            let canvasWidth, canvasHeight;
+            if (containerWidth > containerHeight) {
+                // 横屏（PC/平板横放）保持原比例
+                canvasWidth = 720;
+                canvasHeight = 480;
+            } else {
+                // 竖屏（手机）→ 增高画布，竖向格子更多，体验更好
+                canvasWidth = 540;
+                canvasHeight = 660;
+            }
+            
+            GAME_CONFIG.canvasWidth = canvasWidth;
+            GAME_CONFIG.canvasHeight = canvasHeight;
+
+            const ratio = canvasWidth / canvasHeight;
             
             let displayWidth = containerWidth;
             let displayHeight = containerWidth / ratio;
@@ -580,8 +597,8 @@
             
             canvas.style.width = displayWidth + 'px';
             canvas.style.height = displayHeight + 'px';
-            canvas.width = GAME_CONFIG.canvasWidth;
-            canvas.height = GAME_CONFIG.canvasHeight;
+            canvas.width = canvasWidth;
+            canvas.height = canvasHeight;
             
             redraw();
         }
@@ -758,6 +775,7 @@
             const rows = Math.floor(GAME_CONFIG.canvasHeight / GAME_CONFIG.gridSize);
 
             // 初始化蛇1
+            // 根据屏幕尺寸动态计算中心位置
             snake1 = [];
             const centerX = Math.floor(cols / 2);
             const centerY = Math.floor(rows / 2);
@@ -790,7 +808,7 @@
             // 启动计时器和游戏循环
             startTimer();
             if (gameLoop) clearInterval(gameLoop);
-            gameLoop = setInterval(updateGame, 150); // 控制游戏速度
+            gameLoop = setInterval(updateGame, GAME_CONFIG.moveInterval); // 控制游戏速度
         }
 
         function startTimer() {
@@ -874,7 +892,7 @@
                 y: head.y + dir.y
             };
 
-            // 边界环绕（穿墙）
+            // 边界环绕（穿墙）- 使用当前动态画布尺寸
             const cols = Math.floor(GAME_CONFIG.canvasWidth / GAME_CONFIG.gridSize);
             const rows = Math.floor(GAME_CONFIG.canvasHeight / GAME_CONFIG.gridSize);
             
