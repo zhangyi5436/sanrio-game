@@ -778,6 +778,12 @@
                         continue;
                     }
 
+                    // 规则3：不能在画布边缘（边界格子）
+                    if (x <= 0 || x >= cols - 1 || y <= 0 || y >= rows - 1) {
+                        attempts++;
+                        continue;
+                    }
+
                     // 计算到已放置蛋的最小距离，越大越分散
                     let minDist = 9999;
                     eggs.forEach((otherEgg, otherIndex) => {
@@ -796,14 +802,27 @@
                     attempts++;
                 }
 
-                // 如果找到位置就用，否则随便找一个
+                // 如果找到位置就用，否则放宽限制重试
                 if (bestX === null) {
-                    // 如果找不到符合行列规则的，放宽限制
+                    let found = false;
+                    let x, y;
+                    let attempts2 = 0;
+                    // 如果找不到符合所有规则，放宽边缘限制但保留蛇行/列规则
                     do {
                         x = Math.floor(Math.random() * cols);
                         y = Math.floor(Math.random() * rows);
-                        attempts++;
-                    } while (occupied.has(`${x},${y}`) && attempts < 100);
+                        attempts2++;
+                        // 放宽：允许边缘，但仍然不能在蛇位置和蛇行列
+                        found = !occupied.has(`${x},${y}`) && !forbiddenRows.has(y) && !forbiddenCols.has(x);
+                    } while (!found && attempts2 < 100);
+                    if (!found) {
+                        // 如果还是找不到，完全放宽
+                        do {
+                            x = Math.floor(Math.random() * cols);
+                            y = Math.floor(Math.random() * rows);
+                            attempts2++;
+                        } while (occupied.has(`${x},${y}`) && attempts2 < 100);
+                    }
                     egg.x = x;
                     egg.y = y;
                 } else {
