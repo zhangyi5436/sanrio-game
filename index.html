@@ -971,11 +971,11 @@
                     gameOver = true;
                 } else {
                     gameOver = true;
-                    winner = 2;
+                    winner = 2; // snake1 没了，snake2赢
                 }
             } else if (gameMode === 'double' && snake2.length <= 0) {
                 gameOver = true;
-                winner = 1;
+                winner = 1; // snake2 没了，snake1赢
             }
 
             if (gameOver) {
@@ -1383,12 +1383,28 @@
                     最终蛇长：${snake1.length} 节
                 `;
             } else {
-                if (winner === 1) {
-                    const char1 = CHARACTERS.find(c => c.id === selectedCharacter);
-                    titleText = `${char1.name} 获胜！🎉`;
+                // 如果已经有一方长度为0，按之前判定
+                if (typeof winner !== 'undefined') {
+                    if (winner === 1) {
+                        const char1 = CHARACTERS.find(c => c.id === selectedCharacter);
+                        titleText = `${char1.name} 获胜！🎉`;
+                    } else {
+                        const char2 = CHARACTERS.find(c => c.id === selectedCharacter2);
+                        titleText = `${char2.name} 获胜！🎉`;
+                    }
                 } else {
-                    const char2 = CHARACTERS.find(c => c.id === selectedCharacter2);
-                    titleText = `${char2.name} 获胜！🎉`;
+                    // 时间到了，双方都还有长度，比较长度定胜负
+                    const len1 = snake1.length;
+                    const len2 = snake2.length;
+                    if (len1 > len2) {
+                        const char1 = CHARACTERS.find(c => c.id === selectedCharacter);
+                        titleText = `${char1.name} 获胜！🎉`;
+                    } else if (len2 > len1) {
+                        const char2 = CHARACTERS.find(c => c.id === selectedCharacter2);
+                        titleText = `${char2.name} 获胜！🎉`;
+                    } else {
+                        titleText = '平局！🤝';
+                    }
                 }
                 const len1 = snake1.length;
                 const len2 = snake2.length;
