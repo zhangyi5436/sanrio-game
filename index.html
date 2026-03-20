@@ -761,8 +761,8 @@
                 let bestY = null;
                 let bestMinDist = 0;
 
-                // 多次随机找一个分散性最好的位置
-                while (attempts < 50) {
+                // 多次随机找一个分散性最好的位置（增加尝试次数保证找到符合边缘规则的位置）
+                while (attempts < 100) {
                     let x = Math.floor(Math.random() * cols);
                     let y = Math.floor(Math.random() * rows);
 
@@ -778,8 +778,8 @@
                         continue;
                     }
 
-                    // 规则3：不能在画布边缘（边界格子）
-                    if (x <= 0 || x >= cols - 1 || y <= 0 || y >= rows - 1) {
+                    // 规则3：不能在画布边缘，向内至少缩进2格，确保完全不靠边
+                    if (x < 2 || x >= cols - 2 || y < 2 || y >= rows - 2) {
                         attempts++;
                         continue;
                     }
