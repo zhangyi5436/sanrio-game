@@ -1,0 +1,13 @@
+{
+  "name": "sanrio-game",
+  "version": "1.0.0",
+  "description": "三丽鸥益智贪吃蛇H5小游戏",
+  "main": "index.html",
+  "scripts": {
+    "build": "mkdir -p dist && cp index.html dist/ && cp -r assets dist/",
+    "start": "python3 -m http.server 8000"
+  },
+  "keywords": ["game", "html5", "sanrio", "snake", "math"],
+  "author": "",
+  "license": "MIT"
+}
