@@ -1265,58 +1265,63 @@
         }
 
         // ==================== 触摸控制（手机端） ====================
+        // 新模式：手指贴着屏幕移动，贪吃蛇跟着手指方向走
         function handleTouchStart(e) {
             if (!e.touches || e.touches.length === 0) return;
-            // 记录起点，不需要检查gameState，保证能记录
-            touchStartX = e.touches[0].clientX;
-            touchStartY = e.touches[0].clientY;
+            // 记录起点
+            lastTouchX = e.touches[0].clientX;
+            lastTouchY = e.touches[0].clientY;
         }
 
-        function handleTouchEnd(e) {
+        function handleTouchMove(e) {
             if (gameState !== 'playing') return;
-            if (!touchStartX || !touchStartY) return;
-            if (!e.changedTouches || e.changedTouches.length === 0) return;
+            if (!lastTouchX || !lastTouchY) return;
+            if (!e.touches || e.touches.length === 0) return;
 
-            const touchEndX = e.changedTouches[0].clientX;
-            const touchEndY = e.changedTouches[0].clientY;
+            const currentX = e.touches[0].clientX;
+            const currentY = e.touches[0].clientY;
 
-            const diffX = touchEndX - touchStartX;
-            const diffY = touchEndY - touchStartY;
+            const diffX = currentX - lastTouchX;
+            const diffY = currentY - lastTouchY;
 
-            console.log('Touch swipe:', diffX, diffY);
-
-            // 判断滑动方向 - 降低阈值，提升灵敏度
+            // 只要手指移动超过阈值，就更新方向
             if (Math.abs(diffX) > Math.abs(diffY)) {
-                // 水平滑动
-                if (diffX > 30 && direction1.x !== -1) {
+                // 水平移动
+                if (diffX > 10 && direction1.x !== -1) {
                     nextDirection1 = { x: 1, y: 0 };
                     console.log('Touch direction: RIGHT');
-                } else if (diffX < -30 && direction1.x !== 1) {
+                } else if (diffX < -10 && direction1.x !== 1) {
                     nextDirection1 = { x: -1, y: 0 };
                     console.log('Touch direction: LEFT');
                 }
             } else {
-                // 垂直滑动
-                if (diffY > 30 && direction1.y !== -1) {
+                // 垂直移动
+                if (diffY > 10 && direction1.y !== -1) {
                     nextDirection1 = { x: 0, y: 1 };
                     console.log('Touch direction: DOWN');
-                } else if (diffY < -30 && direction1.y !== 1) {
+                } else if (diffY < -10 && direction1.y !== 1) {
                     nextDirection1 = { x: 0, y: -1 };
                     console.log('Touch direction: UP');
                 }
             }
 
-            touchStartX = 0;
-            touchStartY = 0;
+            // 更新最后位置
+            lastTouchX = currentX;
+            lastTouchY = currentY;
+
+            // 阻止页面滚动
             e.preventDefault();
         }
 
-        function handleTouchMove(e) {
-            // 阻止页面滚动，让游戏更流畅
-            if (gameState === 'playing') {
-                e.preventDefault();
-            }
+        function handleTouchEnd(e) {
+            // 重置最后位置
+            lastTouchX = 0;
+            lastTouchY = 0;
         }
+
+        // 保存最后触摸位置变量
+        let lastTouchX = 0;
+        let lastTouchY = 0;
 
         // ==================== 音效 ====================
 
