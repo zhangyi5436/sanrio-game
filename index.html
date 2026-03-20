@@ -995,8 +995,10 @@
         }
 
         function drawSnake(snake, characterId, snakeNum) {
+            if (!characterId) return; // 游戏还没开始，不绘制
             const gs = GAME_CONFIG.gridSize;
             const charInfo = CHARACTERS.find(c => c.id === characterId);
+            if (!charInfo) return;
             const baseColor = charInfo.color;
 
             // 绘制身体（除了头部）
